@@ -37,7 +37,12 @@ export default function Home() {
         .channel('bookmarks-changes')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'bookmarks' },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'bookmarks',
+            filter: `user_id=eq.${user.id}`
+          },
           (payload) => {
             fetchBookmarks()
           }
@@ -48,7 +53,6 @@ export default function Home() {
         supabase.removeChannel(channel)
       }
     }, [user])
-
 
     const fetchBookmarks = async () => {
         const { data } = await supabase
