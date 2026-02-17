@@ -30,42 +30,31 @@ export default function Home() {
         getUserAndBookmarks()
     }, [])
 
-    useEffect(() => {
+   useEffect(() => {
       if (!user) return
 
       const channel = supabase
-        .channel('bookmarks-realtime')
+        .channel('debug-realtime')
         .on(
           'postgres_changes',
           {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'bookmarks',
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            setBookmarks(prev => [payload.new, ...prev])
+            console.log("Realtime event received:", payload)
           }
         )
-        .on(
-          'postgres_changes',
-          {
-            event: 'DELETE',
-            schema: 'public',
-            table: 'bookmarks',
-            filter: `user_id=eq.${user.id}`
-          },
-          (payload) => {
-            setBookmarks(prev => prev.filter(b => b.id !== payload.old.id))
-          }
-        )
-        .subscribe()
+        .subscribe((status) => {
+          console.log("Realtime status:", status)
+        })
 
       return () => {
         supabase.removeChannel(channel)
       }
     }, [user])
-
 
     const fetchBookmarks = async () => {
         const { data } = await supabase
