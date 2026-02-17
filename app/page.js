@@ -30,6 +30,26 @@ export default function Home() {
         getUserAndBookmarks()
     }, [])
 
+    useEffect(() => {
+      if (!user) return
+
+      const channel = supabase
+        .channel('bookmarks-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'bookmarks' },
+          (payload) => {
+            fetchBookmarks()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }, [user])
+
+
     const fetchBookmarks = async () => {
         const { data } = await supabase
         .from("bookmarks")
