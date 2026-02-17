@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "../lib/supabaseClient"
+import { getSupabaseClient } from "../lib/supabaseClient"
 import GoogleIcon from "../src/assets/google.svg";
 
 export default function Home() {
@@ -12,6 +12,15 @@ export default function Home() {
     const [url, setUrl] = useState("")
     const [checkingAuth, setCheckingAuth] = useState(true)
     const [errors, setErrors] = useState({})
+
+    useEffect(() => {
+      const supabase = getSupabaseClient()
+
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data.user)
+      })
+
+  }, [])
 
     // Fetch user + bookmarks
     useEffect(() => {
